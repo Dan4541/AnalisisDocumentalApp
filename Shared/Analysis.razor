@@ -1,0 +1,131 @@
+﻿@page "/analysis"
+@using AnalisisDocumentalApp.Models
+@using AnalisisDocumentalApp.Services
+@inject IDocumentService DocumentService
+@inject ILogService LogService
+
+<h3>Document Analysis</h3>
+
+<div class="row my-4">
+    <InputFile OnChange="@LoadFiles" />
+</div>
+
+@if (_loading)
+{
+    <p>Loading...</p>
+}
+else if (_documentType != null)
+{
+    
+    @if (_documentType == DocumentType.Invoice)
+    {
+        @if (isModalFacturaVisible)
+        {
+            <div class="modal fade show" tabindex="-1" style="display:block;">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-dark text-white">
+                            <h5 class="modal-title">Document Information</h5>
+                            <button type="button" class="btn-close text-white" @onclick="CloseModal"></button>
+                        </div>
+                        <div class="modal-body bg-dark text-white">
+
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <h4>Type of document: @_documentType</h4>
+                                    <ul>
+                                        <li class="list-unstyled"><strong> Client: </strong> @_invoiceInfo.ClientName</li>
+                                        <li class="list-unstyled"><strong> Client Address: </strong> @_invoiceInfo.ClientAddress</li>
+                                        <li class="list-unstyled"><strong> Supplier: </strong> @_invoiceInfo.SupplierName</li>
+                                        <li class="list-unstyled"><strong> Supplier Address: </strong> @_invoiceInfo.SupplierAddress</li>
+                                        <li class="list-unstyled"><strong> Invoice Number: </strong> @_invoiceInfo.InvoiceNumber</li>
+                                        <li class="list-unstyled"><strong> Date: </strong> @_invoiceInfo.Date.ToShortDateString()</li>
+                                        <li class="list-unstyled"><strong> Total: </strong> @_invoiceInfo.TotalInvoice.ToString("C")</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <h4 class="mt-4">Items:</h4>
+                                <table class="table table-striped table-bordered text-white">
+                                    <thead>
+                                        <tr>
+                                            <th>Quantity</th>
+                                            <th>Name</th>
+                                            <th>Unit Price</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var invoiceItem in _invoiceInfo.InvoiceItems)
+                                        {
+                                            <tr>
+                                                <td class="text-white">@invoiceItem.Quantity</td>
+                                                <td class="text-white">@invoiceItem.Name</td>
+                                                <td class="text-white">@invoiceItem.UnitPrice.ToString("C")</td>
+                                                <td class="text-white">@invoiceItem.TotalAmount.ToString("C")</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                        <div class="modal-footer bg-dark">
+                            <button type="button" class="btn btn-danger" @onclick="CloseModal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+    }
+    else if (_documentType == DocumentType.Information)
+    {
+        <h4>Type of document: @_documentType</h4>
+        <p><strong>Description:</strong> @_informationDocument.Description</p>
+        <p><strong>Summary:</strong> @_informationDocument.Summary</p>
+        <p><strong>Feeling:</strong> @_informationDocument.Feeling</p>
+    }
+}
+
+@code {
+    private bool _loading = false;
+    private DocumentType? _documentType;
+    private InvoiceInfo _invoiceInfo;
+    private InformationDocument _informationDocument;
+    private bool isModalFacturaVisible = false;
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        _loading = true;
+        var file = e.File;
+        var buffer = new byte[file.Size];
+        await file.OpenReadStream().ReadAsync(buffer);
+
+        var documentId = await DocumentService.UploadDocumentAsync(file.Name, file.ContentType, buffer);
+        await LogService.LogActivityAsync(LogType.DocumentUpload, $"Document Uploaded: {file.Name}");
+
+        _documentType = await DocumentService.ClassifyDocumentAsync(documentId);
+        await LogService.LogActivityAsync(LogType.AIProcessing, $"Document classified as: {_documentType}");
+
+        if (_documentType == DocumentType.Invoice)
+        {
+            _invoiceInfo = await DocumentService.ExtractFacturaInfoAsync(documentId);
+            await LogService.LogActivityAsync(LogType.AIProcessing, "Extracted invoice information");
+            isModalFacturaVisible = true;
+        }
+        else if (_documentType == DocumentType.Information)
+        {
+            _informationDocument = await DocumentService.ExtractInformacionAsync(documentId);
+            await LogService.LogActivityAsync(LogType.AIProcessing, "General information extracted");
+        }
+
+        _loading = false;
+    }
+
+    private void CloseModal()
+    {
+        isModalFacturaVisible = false;
+    }
+}
