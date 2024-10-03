@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AnalisisDocumentalApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+4fb540256977473b629706d8d04524b3f73ca02e")]
 [assembly: System.Reflection.AssemblyProductAttribute("AnalisisDocumentalApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AnalisisDocumentalApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

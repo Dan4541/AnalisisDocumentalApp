@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using AnalisisDocumentalApp.Models;
+﻿using AnalisisDocumentalApp.Models;
 using Azure;
 using Azure.AI.FormRecognizer.DocumentAnalysis;
 
@@ -29,14 +28,14 @@ namespace AnalisisDocumentalApp.Services
             using MemoryStream stream = new MemoryStream(documentContent);
             AnalyzeDocumentOperation operation = await _client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-document", stream);
             AnalyzeResult result = operation.Value;
-
-            if (result.Paragraphs.Any(p => p.Content.Contains("factura", StringComparison.OrdinalIgnoreCase)))
+            
+            if (!result.Paragraphs.Any(p => p.Content.Contains("factura", StringComparison.OrdinalIgnoreCase)))
             {
-                return DocumentType.Invoice;
+                return DocumentType.Information;
             }
             else
             {
-                return DocumentType.Information;
+                return DocumentType.Invoice;
             }
         }
 
@@ -67,8 +66,16 @@ namespace AnalisisDocumentalApp.Services
                 invoiceInfo.Date = document.Fields.TryGetValue("InvoiceDate", out var date) ? date.Value.AsDate().DateTime : DateTime.MinValue;
 
                 document.Fields.TryGetValue("InvoiceTotal", out var totalInvoice);
-                var currency = totalInvoice.Value.AsCurrency();
-                invoiceInfo.TotalInvoice = (decimal)currency.Amount;
+
+                if(totalInvoice != null)
+                {
+                    var currency = totalInvoice.Value.AsCurrency();
+                    invoiceInfo.TotalInvoice = (decimal)currency.Amount;
+                }
+                else
+                {
+                    invoiceInfo.TotalInvoice = (decimal)0;
+                }
 
                 if (document.Fields.TryGetValue("Items", out var items) && items.Value.AsList() != null)
                 {
@@ -119,24 +126,30 @@ namespace AnalisisDocumentalApp.Services
 
             return new InformationDocument
             {
-                Description = fullText.Length > 500 ? fullText.Substring(0, 500) + "..." : fullText,
+                Description = fullText.Length > 300 ? fullText.Substring(0, 300) + "..." : fullText,
                 Summary = GenerateSimpleSummary(fullText),
                 Feeling = AnalyzeSentiment(fullText)
             };
         }
 
+        /*
         private string GenerateSimpleSummary(string text)
         {
-            // Implementa una lógica simple de resumen aquí
-            // Por ejemplo, tomar las primeras dos oraciones
             var sentences = text.Split('.', StringSplitOptions.RemoveEmptyEntries);
             return string.Join(". ", sentences.Take(2)) + ".";
         }
+        */
+
+        private string GenerateSimpleSummary(string text)
+        {
+            int maxWords = 20;
+            var words = text.Split(new[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return string.Join(" ", words.Take(maxWords)) + (words.Length > maxWords ? "..." : "");
+        }
+
 
         private string AnalyzeSentiment(string text)
         {
-            // Implementa una lógica simple de análisis de sentimiento aquí
-            // Por ejemplo, contar palabras positivas y negativas
             int positiveWords = CountOccurrences(text, new[] { "bueno", "excelente", "fantástico" });
             int negativeWords = CountOccurrences(text, new[] { "malo", "terrible", "pésimo" });
 

@@ -82,10 +82,28 @@ else if (_documentType != null)
     }
     else if (_documentType == DocumentType.Information)
     {
-        <h4>Type of document: @_documentType</h4>
-        <p><strong>Description:</strong> @_informationDocument.Description</p>
-        <p><strong>Summary:</strong> @_informationDocument.Summary</p>
-        <p><strong>Feeling:</strong> @_informationDocument.Feeling</p>
+        @if (isModalFacturaVisible)
+        {
+            <div class="modal fade show" tabindex="-1" style="display:block;">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-dark text-white">
+                            <h5 class="modal-title">Document Information</h5>
+                            <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                        </div>
+                        <div class="modal-body bg-dark text-white">
+                            <h4 class="my-4">Type of document: @_documentType</h4>
+                            <p><strong>Description:</strong> @_informationDocument.Description</p>
+                            <p><strong>Summary:</strong> @_informationDocument.Summary</p>
+                            <p><strong>Feeling:</strong> @_informationDocument.Feeling</p>
+                        </div>
+                        <div class="modal-footer bg-dark">
+                            <button type="button" class="btn btn-danger" @onclick="CloseModal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
     }
 }
 
@@ -119,6 +137,7 @@ else if (_documentType != null)
         {
             _informationDocument = await DocumentService.ExtractInformacionAsync(documentId);
             await LogService.LogActivityAsync(LogType.AIProcessing, "General information extracted");
+            isModalFacturaVisible = true;
         }
 
         _loading = false;
