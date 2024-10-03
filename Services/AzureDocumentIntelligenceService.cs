@@ -18,6 +18,21 @@ namespace AnalisisDocumentalApp.Services
 
         }
 
+        /// <summary>
+        /// Clasifica un documento basándose en su contenido.
+        /// </summary>
+        /// <param name="documentContent">Un array de bytes que representa el contenido del documento a clasificar.</param>
+        /// <returns>
+        /// Retorna un <see cref="Task{TResult}"/> que representa la operación asíncrona.
+        /// El resultado de la tarea es un <see cref="DocumentType"/> que indica el tipo de documento clasificado:
+        /// <see cref="DocumentType.Invoice"/> si el documento contiene la palabra "factura" (sin distinción entre mayúsculas y minúsculas),
+        /// o <see cref="DocumentType.Information"/> en caso contrario.
+        /// </returns>
+        /// <exception cref="ArgumentException">Se lanza cuando el contenido del documento es nulo o vacío.</exception>
+        /// <remarks>
+        /// Este método utiliza el servicio Azure Form Recognizer para analizar el contenido del documento.
+        /// La clasificación se basa en la presencia de la palabra "factura" en cualquier párrafo del documento.
+        /// </remarks>
         public async Task<DocumentType> ClassifyDocumentAsync(byte[] documentContent)
         {
             if (documentContent == null || documentContent.Length == 0)
@@ -39,7 +54,29 @@ namespace AnalisisDocumentalApp.Services
             }
         }
 
-        public async Task<InvoiceInfo> ExtractFacturaInfoAsync(byte[] documentContent)
+        /// <summary>
+        /// Extrae información detallada de una factura a partir de su contenido en bytes.
+        /// </summary>
+        /// <param name="documentContent">Un array de bytes que representa el contenido del documento de la factura.</param>
+        /// <returns>
+        /// Retorna un <see cref="Task{TResult}"/> que representa la operación asíncrona.
+        /// El resultado de la tarea es un objeto <see cref="InvoiceInfo"/> que contiene la información extraída de la factura,
+        /// incluyendo detalles del cliente, proveedor, número de factura, fecha, total y elementos individuales.
+        /// </returns>
+        /// <remarks>
+        /// Este método utiliza el servicio Azure Form Recognizer con el modelo prebuilt-invoice para analizar el contenido de la factura.
+        /// La información extraída incluye:
+        /// - Nombre y dirección del cliente
+        /// - Nombre y dirección del proveedor
+        /// - Número de factura
+        /// - Fecha de la factura
+        /// - Total de la factura
+        /// - Lista detallada de elementos de la factura (nombre, cantidad, precio unitario, importe total)
+        /// 
+        /// Si algún campo no se encuentra en el documento, se utilizan valores predeterminados o cadenas vacías según corresponda.
+        /// </remarks>
+        /// <exception cref="Exception">Puede lanzar excepciones si hay problemas al analizar el documento o extraer la información.</exception>
+        public async Task<InvoiceInfo> ExtractInvoiceInfoAsync(byte[] documentContent)
         {
             using MemoryStream stream = new MemoryStream(documentContent);
             AnalyzeDocumentOperation operation = await _client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-invoice", stream);
@@ -116,7 +153,29 @@ namespace AnalisisDocumentalApp.Services
             return invoiceInfo;
         }
 
-        public async Task<InformationDocument> ExtractInformacionAsync(byte[] documentContent)
+        /// <summary>
+        /// Extrae y analiza información de un documento a partir de su contenido en bytes.
+        /// </summary>
+        /// <param name="documentContent">Un array de bytes que representa el contenido del documento a analizar.</param>
+        /// <returns>
+        /// Retorna un <see cref="Task{TResult}"/> que representa la operación asíncrona.
+        /// El resultado de la tarea es un objeto <see cref="InformationDocument"/> que contiene:
+        /// - Una descripción breve del documento (primeros 300 caracteres o menos)
+        /// - Un resumen simple del contenido
+        /// - Un análisis del sentimiento general del texto
+        /// </returns>
+        /// <remarks>
+        /// Este método utiliza el servicio Azure Form Recognizer con el modelo prebuilt-document para analizar el contenido del documento.
+        /// El proceso incluye:
+        /// 1. Extracción del texto completo del documento.
+        /// 2. Generación de una descripción breve (máximo 300 caracteres).
+        /// 3. Creación de un resumen simple utilizando el método GenerateSimpleSummary (no incluido en este fragmento).
+        /// 4. Análisis del sentimiento del texto utilizando el método AnalyzeSentiment (no incluido en este fragmento).
+        /// 
+        /// Los métodos GenerateSimpleSummary y AnalyzeSentiment deben estar implementados en la clase para que este método funcione correctamente.
+        /// </remarks>
+        /// <exception cref="Exception">Puede lanzar excepciones si hay problemas al analizar el documento o extraer la información.</exception>
+        public async Task<InformationDocument> ExtractInformationAsync(byte[] documentContent)
         {
             using MemoryStream stream = new MemoryStream(documentContent);
             AnalyzeDocumentOperation operation = await _client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-document", stream);
@@ -132,14 +191,21 @@ namespace AnalisisDocumentalApp.Services
             };
         }
 
-        /*
-        private string GenerateSimpleSummary(string text)
-        {
-            var sentences = text.Split('.', StringSplitOptions.RemoveEmptyEntries);
-            return string.Join(". ", sentences.Take(2)) + ".";
-        }
-        */
-
+        /// <summary>
+        /// Genera un resumen simple de un texto, limitando la cantidad de palabras.
+        /// </summary>
+        /// <param name="text">El texto completo del que se generará el resumen.</param>
+        /// <returns>
+        /// Una cadena que contiene las primeras 20 palabras del texto original.
+        /// Si el texto original tiene más de 20 palabras, se añaden puntos suspensivos al final.
+        /// </returns>
+        /// <remarks>
+        /// Este método:
+        /// 1. Divide el texto en palabras, considerando espacios, retornos de carro y saltos de línea como separadores.
+        /// 2. Selecciona las primeras 20 palabras.
+        /// 3. Une estas palabras en una sola cadena.
+        /// 4. Si el texto original tenía más de 20 palabras, añade "..." al final del resumen.
+        /// </remarks>
         private string GenerateSimpleSummary(string text)
         {
             int maxWords = 20;
@@ -147,7 +213,16 @@ namespace AnalisisDocumentalApp.Services
             return string.Join(" ", words.Take(maxWords)) + (words.Length > maxWords ? "..." : "");
         }
 
-
+        /// <summary>
+        /// Analiza el sentimiento general de un texto basándose en la presencia de palabras positivas y negativas predefinidas.
+        /// </summary>
+        /// <param name="text">El texto a analizar.</param>
+        /// <returns>
+        /// Una cadena que representa el sentimiento general del texto:
+        /// - "Positivo" si hay más palabras positivas que negativas.
+        /// - "Negativo" si hay más palabras negativas que positivas.
+        /// - "Neutral" si el número de palabras positivas y negativas es igual, o si no se encuentran palabras clave.
+        /// </returns>
         private string AnalyzeSentiment(string text)
         {
             int positiveWords = CountOccurrences(text, new[] { "bueno", "excelente", "fantástico" });
@@ -158,6 +233,21 @@ namespace AnalisisDocumentalApp.Services
             return "Neutral";
         }
 
+        /// <summary>
+        /// Cuenta el número total de ocurrencias de un conjunto de palabras en un texto dado.
+        /// </summary>
+        /// <param name="text">El texto en el que se buscarán las palabras.</param>
+        /// <param name="words">Un array de cadenas que contiene las palabras a buscar.</param>
+        /// <returns>
+        /// Un entero que representa el número total de veces que aparecen las palabras especificadas en el texto.
+        /// </returns>
+        /// <remarks>
+        /// Este método:
+        /// 1. Divide el texto en palabras individuales, utilizando espacios, puntos y comas como separadores.
+        /// 2. Compara cada palabra del texto con cada palabra del array 'words'.
+        /// 3. Realiza una comparación sin distinguir entre mayúsculas y minúsculas.
+        /// 4. Suma todas las ocurrencias encontradas.
+        /// </remarks>
         private int CountOccurrences(string text, string[] words)
         {
             return words.Sum(word => text.Split(new[] { ' ', '.', ',' }, StringSplitOptions.RemoveEmptyEntries)

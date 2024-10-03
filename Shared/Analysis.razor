@@ -129,13 +129,13 @@ else if (_documentType != null)
 
         if (_documentType == DocumentType.Invoice)
         {
-            _invoiceInfo = await DocumentService.ExtractFacturaInfoAsync(documentId);
+            _invoiceInfo = await DocumentService.ExtractInvoiceInfoAsync(documentId);
             await LogService.LogActivityAsync(LogType.AIProcessing, "Extracted invoice information");
             isModalFacturaVisible = true;
         }
         else if (_documentType == DocumentType.Information)
         {
-            _informationDocument = await DocumentService.ExtractInformacionAsync(documentId);
+            _informationDocument = await DocumentService.ExtractInformationAsync(documentId);
             await LogService.LogActivityAsync(LogType.AIProcessing, "General information extracted");
             isModalFacturaVisible = true;
         }
