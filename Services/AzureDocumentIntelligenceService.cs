@@ -78,6 +78,11 @@ namespace AnalisisDocumentalApp.Services
         /// <exception cref="Exception">Puede lanzar excepciones si hay problemas al analizar el documento o extraer la información.</exception>
         public async Task<InvoiceInfo> ExtractInvoiceInfoAsync(byte[] documentContent)
         {
+            if (documentContent == null || documentContent.Length == 0)
+            {
+                throw new ArgumentException("The document content cannot be empty.");
+            }
+
             using MemoryStream stream = new MemoryStream(documentContent);
             AnalyzeDocumentOperation operation = await _client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-invoice", stream);
             AnalyzeResult result = operation.Value;
@@ -100,18 +105,48 @@ namespace AnalisisDocumentalApp.Services
                 invoiceInfo.SupplierAddress = $"{av.City} {av.State} {av.House} {av.Suburb}";
 
                 invoiceInfo.InvoiceNumber = document.Fields.TryGetValue("InvoiceId", out var numInvoice) ? numInvoice.Value.AsString() : "";
-                invoiceInfo.Date = document.Fields.TryGetValue("InvoiceDate", out var date) ? date.Value.AsDate().DateTime : DateTime.MinValue;
 
-                document.Fields.TryGetValue("InvoiceTotal", out var totalInvoice);
-
-                if(totalInvoice != null)
+                if (document.Fields.TryGetValue("InvoiceDate", out var dateField) && dateField.Value != null)
                 {
-                    var currency = totalInvoice.Value.AsCurrency();
-                    invoiceInfo.TotalInvoice = (decimal)currency.Amount;
+                    try
+                    {
+                        var extractedDate = dateField.Value.AsDate().DateTime;
+
+                        if (extractedDate == new DateTime(2000, 1, 1))
+                        {
+                            invoiceInfo.Date = DateTime.MinValue;
+                        }
+                        else
+                        {
+                            invoiceInfo.Date = extractedDate;
+                        }
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        invoiceInfo.Date = DateTime.MinValue;
+                    }
                 }
                 else
                 {
-                    invoiceInfo.TotalInvoice = (decimal)0;
+                    invoiceInfo.Date = DateTime.MinValue; 
+                }
+
+
+                if (document.Fields.TryGetValue("InvoiceTotal", out var totalInvoice) && totalInvoice.Value != null)
+                {
+                    try
+                    {
+                        var currency = totalInvoice.Value.AsCurrency();
+                        invoiceInfo.TotalInvoice = (decimal)currency.Amount;
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        invoiceInfo.TotalInvoice = 0;
+                    }
+                }
+                else
+                {
+                    invoiceInfo.TotalInvoice = 0; 
                 }
 
                 if (document.Fields.TryGetValue("Items", out var items) && items.Value.AsList() != null)
@@ -206,7 +241,7 @@ namespace AnalisisDocumentalApp.Services
         /// 3. Une estas palabras en una sola cadena.
         /// 4. Si el texto original tenía más de 20 palabras, añade "..." al final del resumen.
         /// </remarks>
-        private string GenerateSimpleSummary(string text)
+        public string GenerateSimpleSummary(string text)
         {
             int maxWords = 20;
             var words = text.Split(new[] { ' ', '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
