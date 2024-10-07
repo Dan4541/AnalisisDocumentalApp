@@ -89,6 +89,12 @@ namespace AnalysisDocumentalApp.Services
             InvoiceInfo invoiceInfo = new InvoiceInfo();
             invoiceInfo.InvoiceItems = new List<InvoiceItem>();
 
+            if (!result.Paragraphs.Any() || result.Paragraphs.All(p => string.IsNullOrWhiteSpace(p.Content)))
+            {
+                throw new ArgumentException("The document content cannot be empty.");
+            }
+
+
             for (int i = 0; i < result.Documents.Count; i++)
             {
                 AnalyzedDocument document = result.Documents[i];                
