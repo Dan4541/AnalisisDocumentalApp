@@ -1,1 +1,27 @@
+# Archivos y carpetas generados por el compilador
+bin/
+obj/
+
+# Archivos de usuario y configuración del entorno de Visual Studio
+.vscode/
 .vs/
+
+# Archivos de paquetes y dependencias
+*.nupkg
+*.snupkg
+.nuget/
+
+# Logs
+*.log
+
+# Configuraciones temporales y otros archivos que no son necesarios para compartir
+*.user
+*.suo
+*.tmp
+*.cache
+*.ide
+*.pidb
+
+# Archivos relacionados con la publicación de la aplicación
+publish/
+wwwroot/
