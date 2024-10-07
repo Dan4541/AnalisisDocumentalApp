@@ -1,4 +1,4 @@
-﻿namespace AnalisisDocumentalApp.Models
+﻿namespace AnalysisDocumentalApp.Models
 {
     public class InformationDocument
     {

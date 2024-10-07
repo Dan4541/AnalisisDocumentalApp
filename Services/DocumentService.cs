@@ -1,8 +1,8 @@
-﻿using AnalisisDocumentalApp.Data;
-using AnalisisDocumentalApp.Models;
+﻿using AnalysisDocumentalApp.Data;
+using AnalysisDocumentalApp.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AnalisisDocumentalApp.Services
+namespace AnalysisDocumentalApp.Services
 {
     public class DocumentService : IDocumentService
     {

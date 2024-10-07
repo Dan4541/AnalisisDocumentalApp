@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using AnalisisDocumentalApp.Models;
+using AnalysisDocumentalApp.Models;
 
-namespace AnalisisDocumentalApp.Data
+namespace AnalysisDocumentalApp.Data
 {
     public class ApplicationDbContext : DbContext
     {

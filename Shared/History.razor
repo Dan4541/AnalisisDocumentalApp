@@ -1,6 +1,6 @@
 ﻿@page "/history"
-@using AnalisisDocumentalApp.Models
-@using AnalisisDocumentalApp.Services
+@using AnalysisDocumentalApp.Models
+@using AnalysisDocumentalApp.Services
 @inject ILogService LogService
 @using Microsoft.JSInterop
 @inject IJSRuntime JS
@@ -25,7 +25,7 @@
                 <div class="mb-3 row">
                     <label class="col-sm-2 col-form-label">Search Logs</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" @bind="@filterText" @bind:event="oninput" placeholder="Search by name or event" />
+                        <input type="text" class="form-control" @bind="@filterText" @bind:event="oninput" placeholder="Search by description" />
                     </div>
                 </div>
 

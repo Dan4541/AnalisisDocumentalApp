@@ -1,4 +1,4 @@
-namespace AnalisisDocumentalApp.Data;
+namespace AnalysisDocumentalApp.Data;
 
 public class WeatherForecast
 {

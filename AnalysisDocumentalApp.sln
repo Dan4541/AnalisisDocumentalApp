@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnalisisDocumentalApp", "AnalisisDocumentalApp.csproj", "{FDD16F2F-CE7B-4421-8E6D-FA799BAB7F8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AnalysisDocumentalApp", "AnalysisDocumentalApp.csproj", "{FDD16F2F-CE7B-4421-8E6D-FA799BAB7F8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocsAnalysisTests", "..\DocsAnalysisTests\DocsAnalysisTests.csproj", "{110E24F9-DEA1-40CE-A2AF-5571EA4ADD2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocsAnalysisTests", "..\DocsAnalysisTests\DocsAnalysisTests.csproj", "{110E24F9-DEA1-40CE-A2AF-5571EA4ADD2D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

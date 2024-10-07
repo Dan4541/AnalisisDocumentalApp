@@ -1,6 +1,6 @@
-﻿using AnalisisDocumentalApp.Models;
+﻿using AnalysisDocumentalApp.Models;
 
-namespace AnalisisDocumentalApp.Services
+namespace AnalysisDocumentalApp.Services
 {
     public interface IDocumentService
     {

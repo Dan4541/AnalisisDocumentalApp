@@ -1,6 +1,6 @@
-using AnalisisDocumentalApp.Data;
+using AnalysisDocumentalApp.Data;
 using Microsoft.EntityFrameworkCore;
-using AnalisisDocumentalApp.Services;
+using AnalysisDocumentalApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,8 +1,8 @@
-﻿using AnalisisDocumentalApp.Models;
+﻿using AnalysisDocumentalApp.Models;
 using Azure;
 using Azure.AI.FormRecognizer.DocumentAnalysis;
 
-namespace AnalisisDocumentalApp.Services
+namespace AnalysisDocumentalApp.Services
 {
     public class AzureDocumentIntelligenceService
     {
