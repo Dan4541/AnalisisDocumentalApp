@@ -5,13 +5,13 @@
 @using Microsoft.JSInterop
 @inject IJSRuntime JS
 
-<h3>Logs History</h3>
+<h3 class="text-white">Logs History</h3>
 
 <div class="container mt-4">
     
     @if (logs == null)
     {
-        <p>Loading Logs</p>
+        <p class="text-white">Loading Logs</p>
     }
     else
     {
@@ -23,7 +23,7 @@
                 </div>
 
                 <div class="mb-3 row">
-                    <label class="col-sm-2 col-form-label">Search Logs</label>
+                    <label class="col-sm-2 col-form-label text-white">Search Logs</label>
                     <div class="col-sm-10">
                         <input type="text" class="form-control" @bind="@filterText" @bind:event="oninput" placeholder="Search by description" />
                     </div>
@@ -46,7 +46,7 @@
             <h4>Logs</h4>
             <table class="table table-striped table-bordered">
                 <thead>
-                    <tr>
+                    <tr class="text-white">
                         <th>ID</th>
                         <th>Type</th>
                         <th>Description</th>
@@ -57,7 +57,7 @@
                 <tbody>
                     @foreach (var log in filteredLogs)
                     {
-                        <tr>
+                                <tr class="text-white">
                             <td>@log.Id</td>
                             <td>@log.Type</td>
                             <td>@log.Description</td>
